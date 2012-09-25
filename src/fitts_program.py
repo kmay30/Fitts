@@ -20,11 +20,12 @@ from pymouse import PyMouse
 ##http://code.google.com/p/pymouse/wiki/Documentation
 
 class target(swing.JButton):
-    def __init__(self,radius,shape):
+    def __init__(self,radius,shape,xPos, yPos):
         ### radius is something that will be fed to this at instantiation from the condition generator
         self.radius = radius
         self.color = awt.Color.BLUE
         self.hide()
+        self.position =([xPos, yPos])
         ## shape would be interesting to do here.
         ## http://harryjoy.com/2011/08/21/different-button-shapes-in-swing/
         #need to find out how to make the button circular
