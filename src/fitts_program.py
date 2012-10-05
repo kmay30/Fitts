@@ -13,23 +13,28 @@ import sys
 import threading
 import datetime
 import time
+import math
 from pymouse import PyMouse
 ### note that is is pymouse 1.0, available here
 ### http://pepijndevos.nl/2010/04/pymouse-mouse-control-and-events-on-python/index.html
 ## this is how you use it
 ##http://code.google.com/p/pymouse/wiki/Documentation
+## pymouse is what you use to get the mouse coordinates
 
 class target(swing.JButton):
-    def __init__(self,radius,shape,xPos, yPos):
+    def __init__(self,diagonalLength,xPos, yPos):
         ### radius is something that will be fed to this at instantiation from the condition generator
-        self.radius = radius
+        ### all of our targets will be squares.
+        ### xpos and ypos is the CENTER of the target
+        self.diagonalLength = diagonalLength
         self.color = awt.Color.BLUE
         self.hide()
         self.position =([xPos, yPos])
-        ## shape would be interesting to do here.
-        ## http://harryjoy.com/2011/08/21/different-button-shapes-in-swing/
-        #need to find out how to make the button circular
-        ## need to set the button radius to self.radius
+        ### this actually needs to change, I think- it depends what we are doing for target width.  length along movement axis?
+        ### INTERESTING
+        self.sideLength = self.diagonalLength/math.sqrt(2)
+
+
     def draw(self):
         ## should not be necessary, but in case it is not refreshing, call this
         self.show()
@@ -37,25 +42,48 @@ class target(swing.JButton):
         self.repaint()
 
 
-class condition():
-    def __init__(self, targetRadius, targetDistance, targetShape):
-        ### just a class for a condition.  shoudl probably be a struct or something
-        self.targetRadius = targetRadius
+class trial():
+    def __init__(self, targetDiagonalLength, targetDistance):
+        ### just a class for a condition.  should probably be a struct or something
+        ### so a condtion
+        self.targetDiagonalLength = targetDiagonalLength
         self.targetDistance = targetDistance
-        self.targetShape = targetShape
+        self.targetAngle =  targetAngle
+
 
 
 class conditionBuilder():
     def __init__(self,settings):
         ### some sort of latin square logic here
         ### it looks at the information in the settings file, and is able to output the
-        ### appropriate condition at a given time
-        ### it needs to remove conditions that were already used, etc. etc.
+        ### appropriate trial at a given time
+        ### so first we make a condition list of all conditions
+        self.conditionList = []
 
-    def getCondition(self):
+        ### then we need to build a TRIAL list with multiple trials per condition
+        ### and then we do the ordering in a certain way
+        ####### populate list
+        self.mostRecentTrial = 1
+
+    def generateNewTrialList(self):
+        self.conditionList = []
+        self.conditionList.append(condition(self.diagonalLength, self.currenttargetDistance, self.currentTargetShape))
+
+    #def addTrial(self, trialToAdd):
+     #   previousList = self.conditionList
+      #  previousList.append(trialToAdd)
+       # self.trialList = []
+        ##### repopulate the condition list with the contents of previousList
+
+    def getTrial(self):
         ### so the trial object will call this to get this information
-        condition = condition(self.currenttargetRadius, self.currenttargetDistance, self.currentTargetShape)
-        return condition
+        trial = self.trialList[-1]
+        return trial
+
+    def remove_Recent(self):
+        self.trialList.pop()
+        ###so it is important NOT to call this until there has been a SUCCESSFUL trial- that is, there was NOT a miss
+        ### technically you might need to reorder the whole square if there was a miss, but who cares, really :)
 
 
 class trial():
@@ -71,11 +99,8 @@ class trial():
         self.targetY = 0
         self.mouseClickX = 0
         self.mouseClickY = 0
-        ### raw size of the error.  just pythogorean theorem it
-        self.errorMagnitude = 0
-        #### not sure if we need these- interesting stuff here, but perhaps not what we want to study
-        #self.onAxisError = 0
-        #self.offAxisError = 0
+        ### so, if a click is outside the target (a 'miss') we need to THROW IT OUT, put it back into the condition builder, then redo the latin square thing
+
 
     def execTrial(self):
         time.sleep(fixationTime/1000)
@@ -86,11 +111,12 @@ class trial():
         screenSize = mouse.screen_size()
         mouse.move( int(mouse.screen_size[0]/2), int(mouse.screen_size[2]/2))
 
-        ## clean everything out of the experimet panel
+        ## clean everything out of the experiment pane
+        ## experiment needs to be a global
         experiment.mainPanel.removeAll()
 
-        currentTarget =
-
+        currentTarget = target(...)
+        ### question to answer: are we ok with misses?
 
 class experiment(swing.JFrame):
     def __init__(self):
