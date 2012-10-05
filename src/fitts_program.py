@@ -63,7 +63,6 @@ class conditionBuilder():
         ### then we need to build a TRIAL list with multiple trials per condition
         ### and then we do the ordering in a certain way
         ####### populate list
-        self.mostRecentTrial = 1
 
     def generateNewTrialList(self):
         self.conditionList = []
