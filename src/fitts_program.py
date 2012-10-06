@@ -22,17 +22,17 @@ from pymouse import PyMouse
 ## pymouse is what you use to get the mouse coordinates
 
 class target(swing.JButton):
-    def __init__(self,diagonalLength,xPos, yPos):
+    def __init__(self,targetWidth,xPos, yPos):
         ### radius is something that will be fed to this at instantiation from the condition generator
         ### all of our targets will be squares.
         ### xpos and ypos is the CENTER of the target
-        self.diagonalLength = diagonalLength
+        self.targetWidth = targetWidth
         self.color = awt.Color.BLUE
         self.hide()
         self.position =([xPos, yPos])
         ### this actually needs to change, I think- it depends what we are doing for target width.  length along movement axis?
         ### INTERESTING
-        self.sideLength = self.diagonalLength/math.sqrt(2)
+        self.sideLength = self.targetWidth/math.sqrt(2)
 
 
     def draw(self):
@@ -41,38 +41,33 @@ class target(swing.JButton):
         self.validate()
         self.repaint()
 
-
-class trial():
-    def __init__(self, targetDiagonalLength, targetDistance):
-        ### just a class for a condition.  should probably be a struct or something
-        ### so a condtion
-        self.targetDiagonalLength = targetDiagonalLength
-        self.targetDistance = targetDistance
-        self.targetAngle =  targetAngle
-
+class trialCondition():
+    def __init__(self):
+        ### this is whether the border is there to simulate 'fullscreen'
+        self.windowBorderPresent = "False"
+        self.targetWidth = 0
+        self.targetX = 0
+        self.targetY = 0
 
 
-class conditionBuilder():
+class trialListBuilder():
     def __init__(self,settings):
         ### some sort of latin square logic here
         ### it looks at the information in the settings file, and is able to output the
         ### appropriate trial at a given time
         ### so first we make a condition list of all conditions
         self.conditionList = []
-
+        #test condition
+        self.conditionList.append(condition(self.targetWidth, self.currenttargetDistance))
         ### then we need to build a TRIAL list with multiple trials per condition
         ### and then we do the ordering in a certain way
         ####### populate list
 
     def generateNewTrialList(self):
-        self.conditionList = []
-        self.conditionList.append(condition(self.diagonalLength, self.currenttargetDistance, self.currentTargetShape))
+        self.trialList = []
+        ## so we acc trialCondtions objects to this
 
-    #def addTrial(self, trialToAdd):
-     #   previousList = self.conditionList
-      #  previousList.append(trialToAdd)
-       # self.trialList = []
-        ##### repopulate the condition list with the contents of previousList
+
 
     def getTrial(self):
         ### so the trial object will call this to get this information
@@ -86,13 +81,12 @@ class conditionBuilder():
 
 
 class trial():
-    def __init__(self, experiment, fixationTime, timeoutTime, condition):
+    def __init__(self, fixationTime, timeoutTime, trialCondition):
         ### code for carrying out an actual trial
         ### the sequence is: render fixation cross, wait fixation time, display target, wait for mouse click on target, write information,
         ### condition is an object
         self.movementTime = 0
         self.targetCoordinates = []
-        self.experiment = experiment
         ## calculate the target coordinates here
         self.targetX = 0
         self.targetY = 0
@@ -114,11 +108,13 @@ class trial():
         ## experiment needs to be a global
         experiment.mainPanel.removeAll()
 
-        currentTarget = target(...)
+        currentTarget = target(trialCondition.targetWidth, trialCondition.targetX, trialCondition.targetY)
+
+
         ### question to answer: are we ok with misses?
 
 class experiment(swing.JFrame):
-    def __init__(self):
+    def __init__(self, settings):
         ## so an experiment is both a data structure containing the sequence of events, and the actual window
         self.setUndecorated(true)
         self.mainPanel = swing.JPanel()
@@ -127,8 +123,10 @@ class experiment(swing.JFrame):
         ### need to make this fullscreen somehow
         self.show()
         self.showInstructionPage()
-
-        self.conditionBuilder = conditionBuilder()
+        ### these times are in ms
+        self.fixationTime = settings.fixationTime
+        self.timeoutTime =  settings.self.timeoutTime
+        self.trialListBuilder = trialListBuilder()
 
     def showInstructionPage(self):
         self.mainPanel.add(swing.JLabel('You are going to be clicking on targets.  When you are done, recenter the mouse.'))
@@ -139,7 +137,7 @@ class experiment(swing.JFrame):
         self.mainPanel.add(continueButton)
 
     def callback_startExperiment(self):
-        ##... generate the first trial
+        self.trialListBuilder.getTrial(self.fixationTime, self.timeoutTime, self.trialListBuilder.getTrial())
 
 
 
@@ -150,7 +148,6 @@ class settings():
         ## just guessing what these would be
         self.targetRadiusList = []
         self.targetDistanceList = []
-        self.targetShapeList = []
         self.trialsPerCondition = 50
         ### this is the time to display the fixatin cross in between trials, in ms
         self.fixationTime = 10
@@ -160,7 +157,7 @@ class settings():
         self.breakNumber = 0
         self.breakTime = 0
         #### if the person is taking too long, time out and redo the trial
-        self.timeOutTime = 5000
+        self.timeoutTime = 5000
 
 
 
