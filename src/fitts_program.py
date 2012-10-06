@@ -61,13 +61,15 @@ class trialListBuilder():
         self.conditionList.append(condition(self.targetWidth, self.currenttargetDistance))
         ### then we need to build a TRIAL list with multiple trials per condition
         ### and then we do the ordering in a certain way
-        ####### populate list
+
 
     def generateNewTrialList(self):
         self.trialList = []
-        ## so we acc trialCondtions objects to this
+        ## so we add trialCondtions objects to this
 
-
+    def reshuffle_Trials(self):
+        oldTrialList = oldList
+        self.trialList = ...
 
     def getTrial(self):
         ### so the trial object will call this to get this information
@@ -77,7 +79,7 @@ class trialListBuilder():
     def remove_Recent(self):
         self.trialList.pop()
         ###so it is important NOT to call this until there has been a SUCCESSFUL trial- that is, there was NOT a miss
-        ### technically you might need to reorder the whole square if there was a miss, but who cares, really :)
+        
 
 
 class trial():
@@ -86,10 +88,10 @@ class trial():
         ### the sequence is: render fixation cross, wait fixation time, display target, wait for mouse click on target, write information,
         ### condition is an object
         self.movementTime = 0
-        self.targetCoordinates = []
         ## calculate the target coordinates here
-        self.targetX = 0
-        self.targetY = 0
+        self.targetX = trialCondition.targetX
+        self.targetY = trialCondition.targetY
+        self.targetWidth = trialCondition.targetWidth
         self.mouseClickX = 0
         self.mouseClickY = 0
         ### so, if a click is outside the target (a 'miss') we need to THROW IT OUT, put it back into the condition builder, then redo the latin square thing
@@ -102,13 +104,32 @@ class trial():
 
         ### this should center the mouse
         screenSize = mouse.screen_size()
-        mouse.move( int(mouse.screen_size[0]/2), int(mouse.screen_size[2]/2))
+        mouse.move( int(screenSize[0]/2), int(screenSize[1]/2))
 
         ## clean everything out of the experiment pane
         ## experiment needs to be a global
         experiment.mainPanel.removeAll()
 
         currentTarget = target(trialCondition.targetWidth, trialCondition.targetX, trialCondition.targetY)
+
+        currentTarget.show()
+
+
+        if trialCondition.windowBorderPresent == "True":
+            ## draw the bounding box
+
+        while 1:
+            ### wait for a mouse click
+
+            self.mouseClickX = mouse.position()[0]
+            self.mouseClickY = mouse.position()[1]
+            if (self.mouseClickX >= self.targetX-self.targetWidth/2) AND (self.mouseClickX <= self.targetX+self.targetWidth/2):
+                ## a hit
+                ## record the result somewhere, next trial
+            else:
+                ## a miss!
+                ## don't record anything, reshuffle the trials, next trial
+
 
 
         ### question to answer: are we ok with misses?
